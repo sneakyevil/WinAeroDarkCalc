@@ -58,8 +58,14 @@ static WNDPROC g_WindowProc = nullptr;
 
 BOOL CALLBACK ChildWindowsEnum(HWND p_Window, LPARAM p_LPARAM)
 {
-    if ((GetWindowLongA(p_Window, GWL_STYLE) & BS_RADIOBUTTON) != 0) {
-        SetWindowTheme(p_Window, L"", L"");
+    char _ClassName[64];
+    GetClassNameA(p_Window, _ClassName, sizeof(_ClassName));
+
+    if (strcmp(_ClassName, "Button") == 0)
+    {
+        if ((GetWindowLongA(p_Window, GWL_STYLE) & BS_RADIOBUTTON) != 0) {
+            SetWindowTheme(p_Window, L"", L"");
+        }
     }
 
     return TRUE;
@@ -180,7 +186,7 @@ LRESULT WindowProc(HWND p_Window, UINT p_Msg, WPARAM p_WParam, LPARAM p_LParam)
         {
             EnumChildWindows(p_Window, ChildWindowsEnum, 0);
         }
-        break; 
+        break;
         case WM_NCPAINT:
         {
             LRESULT _Res = CallWindowProcW(g_WindowProc, p_Window, p_Msg, p_WParam, p_LParam);
