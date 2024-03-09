@@ -115,7 +115,6 @@ LRESULT WindowProc(HWND p_Window, UINT p_Msg, WPARAM p_WParam, LPARAM p_LParam)
             }
 
             FillRect(pUDM->hdc, &rc, g_MenuBarBg);
-
             return true;
         }
         case WM_UAHDRAWMENUITEM:
@@ -180,24 +179,19 @@ LRESULT WindowProc(HWND p_Window, UINT p_Msg, WPARAM p_WParam, LPARAM p_LParam)
         case WM_PAINT:
         {
             EnumChildWindows(p_Window, ChildWindowsEnum, 0);
-            MenuBarUnderlineDraw(p_Window);
         }
         break; 
         case WM_NCPAINT:
         {
-            LRESULT _Res = DefWindowProcA(p_Window, WM_NCPAINT, p_WParam, p_LParam);
+            LRESULT _Res = CallWindowProcW(g_WindowProc, p_Window, p_Msg, p_WParam, p_LParam);
             MenuBarUnderlineDraw(p_Window);
             return _Res;
         }
-        case WM_ACTIVATEAPP:
-        {
-            UpdateWindow(p_Window);
-            InvalidateRect(p_Window, nullptr, false);
-        }
-        break;
+        case WM_ACTIVATE: case WM_ACTIVATEAPP:
+            MenuBarUnderlineDraw(p_Window); break;
     }
 
-    return CallWindowProcA(g_WindowProc, p_Window, p_Msg, p_WParam, p_LParam);
+    return CallWindowProcW(g_WindowProc, p_Window, p_Msg, p_WParam, p_LParam);
 }
 
 //=================================================================================
@@ -214,12 +208,6 @@ DWORD __stdcall MainThread(void* p_Reserved)
     HWND _CalcWindow = GetParent(*_CalcFrame);
 
     g_WindowProc = reinterpret_cast<WNDPROC>(SetWindowLongPtrA(_CalcWindow, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WindowProc)));
-
-    HMENU _CalcMenu = 0;
-    if (!_CalcMenu) {
-        _CalcMenu = GetMenu(_CalcWindow);
-    }
-
     return 0;
 }
 
